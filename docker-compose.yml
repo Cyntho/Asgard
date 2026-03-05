@@ -1,0 +1,150 @@
+services:
+  heimdall:
+    env_file: .env
+    ports:
+      - "5000:5000"
+    networks:
+      - app-net
+    container_name: ts3-bot
+    build: ./heimdall
+    depends_on:
+      teamspeak:
+        condition: service_healthy
+
+  teamspeak:
+    image: teamspeak:latest
+    container_name: ts3-server
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      TS3SERVER_LICENSE: accept
+      TS3SERVER_DB_PLUGIN: ts3db_mariadb
+      TS3SERVER_DB_SQLCREATEPATH: create_mariadb
+      TS3SERVER_DB_HOST: mariadb
+      TS3SERVER_DB_USER: ${MYSQL_USER}
+      TS3SERVER_DB_PASSWORD: ${MYSQL_PASSWORD}
+      TS3SERVER_DB_NAME: ${MYSQL_DATABASE}
+      TS3SERVER_DB_WAITUNTILREADY: 30
+      TS3SERVER_QUERY_PROTOCOLS: raw,ssh,http,https
+    ports:
+      - "9987:9987/udp"
+      - "30033:30033/tcp"
+      - "10011:10011/tcp"
+      - "10080:10080/tcp"
+    volumes:
+      - ts3_data:/var/ts3server
+    healthcheck:
+      test: ["CMD-SHELL", "echo quit | nc 127.0.0.1 10011 | grep -q 'TS3'"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 5s
+    networks:
+      - app-net
+
+  mariadb:
+    image: mariadb:10.11
+    container_name: ts3-mariadb
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    ports:
+    - "3307:3306"
+    healthcheck:
+      test: [ "CMD-SHELL", "mysqladmin ping -h localhost -u${MYSQL_USER} -p${MYSQL_PASSWORD} || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-net
+
+  #backup:
+  #  image: mariadb:10.11
+  #  container_name: ts3-backup
+  #  depends_on:
+  #    mariadb:
+  #      condition: service_healthy
+  #  env_file:
+  #    - .env
+  #  entrypoint: >
+  #    /bin/sh -c "
+  #    while true; do
+  #      echo 'Running backup...';
+  #      mysqldump -h mariadb -u${MYSQL_USER} -p${MYSQL_PASSWORD} ${MYSQL_DATABASE} > /backup/ts3_$(date +%F_%H-%M-%S).sql;
+  #      find /backup -type f -mtime +${BACKUP_RETENTION_DAYS} -delete;
+  #      sleep ${BACKUP_INTERVAL_SECONDS};
+  #    done
+  #    "
+  #  volumes:
+  #    - ts3_backups:/backup
+  #  networks:
+  #    - app-net
+  #  restart: unless-stopped
+
+
+
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: asgard-backend
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    networks:
+      - app-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: asgard-frontend
+    ports:
+      - "80:80"
+    env_file:
+      - .env
+    depends_on:
+      - backend
+    networks:
+      - app-net
+
+  db:
+    image: mysql:8.0
+    container_name: asgard-mysql
+    restart: always
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DB_NAME}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - app-net
+
+volumes:
+  mariadb_data:
+  ts3_data:
+  ts3_backups:
+  mysql-data:
+
+networks:
+  app-net:
+    driver: bridge
