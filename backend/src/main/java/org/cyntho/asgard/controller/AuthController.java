@@ -31,7 +31,9 @@ public class AuthController {
 	public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request,
 	                                          HttpServletRequest httpRequest,
 	                                          HttpServletResponse httpResponse) {
+		log.info("AuthController.PostMapping(/login)");
 		AuthResponse response = authService.login(request, httpRequest, httpResponse);
+		log.info("--> Reponse = {}", response);
 		return ResponseEntity.ok(response);
 	}
 

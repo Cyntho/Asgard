@@ -3,6 +3,7 @@ package org.cyntho.asgard.service.impl;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.cyntho.asgard.dto.AuthDto;
 import org.cyntho.asgard.service.IAuthService;
 import org.cyntho.asgard.service.IUserService;
@@ -15,6 +16,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements IAuthService {
@@ -44,6 +46,7 @@ public class AuthServiceImpl implements IAuthService {
 	                                  HttpServletRequest httpRequest,
 	                                  HttpServletResponse httpResponse) {
 
+		log.info("AuthServiceImpl.login({}, {})", request.username(), request.password());
 		Authentication auth = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(
 						request.username(),
@@ -51,12 +54,15 @@ public class AuthServiceImpl implements IAuthService {
 				)
 		);
 
+		log.info("AuthServiceImpl.login: auth principal = {}", auth.getPrincipal());
+
 		UserEntity user = (UserEntity) auth.getPrincipal();
 
 		String accessToken = jwtService.generateAccessToken(user);
 		String refreshToken = jwtService.generateRefreshToken(user);
 		addRefreshTokenCookie(httpResponse, refreshToken);
 
+		log.info("AuthServiceImpl.login: Generated token {}", accessToken);
 		return new AuthDto.AuthResponse(accessToken);
 	}
 

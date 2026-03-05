@@ -7,10 +7,11 @@ import org.cyntho.asgard.user.UserEntity;
 import org.cyntho.asgard.repository.UserRepository;
 import org.cyntho.asgard.service.IUserService;
 import org.cyntho.asgard.user.UserRole;
-import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.Instant;
 
 @Slf4j
 @Service
@@ -32,6 +33,7 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 				.email(request.email())
 				.password(passwordEncoder.encode(request.password()))
 				.role(UserRole.ROLE_USER)
+				.createdAt(Instant.now())
 				.enabled(true)
 				.build();
 

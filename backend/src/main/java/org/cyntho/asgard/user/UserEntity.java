@@ -3,7 +3,6 @@ package org.cyntho.asgard.user;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.jspecify.annotations.NullMarked;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -49,15 +48,12 @@ public class UserEntity implements UserDetails {
 	}
 
 	@Override
-	@NullMarked
 	public boolean isAccountNonExpired() { return true; }
 
 	@Override
-	@NullMarked
 	public boolean isAccountNonLocked() { return true; }
 
 	@Override
-	@NullMarked
 	public boolean isCredentialsNonExpired() { return true; }
 }
 
