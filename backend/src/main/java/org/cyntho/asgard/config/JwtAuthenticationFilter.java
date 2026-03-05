@@ -4,10 +4,10 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.cyntho.asgard.service.JwtService;
+import org.cyntho.asgard.service.impl.UserServiceImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -18,12 +18,12 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
-	private final UserDetailsService userDetailsService;  // <-- Interface
+	private final UserServiceImpl userService;   // <--- konkrete Klasse
 
 	public JwtAuthenticationFilter(JwtService jwtService,
-	                               UserDetailsService userDetailsService) {
+	                               UserServiceImpl userService) {
 		this.jwtService = jwtService;
-		this.userDetailsService = userDetailsService;
+		this.userService = userService;
 	}
 
 	@Override
@@ -40,14 +40,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 			jwt = authHeader.substring(7);
 			try {
 				username = jwtService.extractUsername(jwt);
-			} catch (Exception ignored) {
-			}
+			} catch (Exception ignored) {}
 		}
 
 		if (username != null &&
 				SecurityContextHolder.getContext().getAuthentication() == null) {
 
-			UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+			UserDetails userDetails = userService.loadUserByUsername(username);
 
 			if (jwtService.isTokenValid(jwt, userDetails)) {
 				UsernamePasswordAuthenticationToken authToken =

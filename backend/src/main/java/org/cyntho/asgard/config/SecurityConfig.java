@@ -28,13 +28,7 @@ import java.util.List;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthFilter;
-	private final UserServiceImpl userServiceImpl; // konkrete Klasse
-
-	@Bean
-	public UserDetailsService userDetailsService() {
-		// Diese Bean ist die zentrale UserDetailsService-Instanz
-		return userServiceImpl;
-	}
+	private final UserServiceImpl userServiceImpl;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -48,7 +42,7 @@ public class SecurityConfig {
 						.requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
 						.anyRequest().authenticated()
 				)
-				.userDetailsService(userDetailsService())
+				.userDetailsService(userServiceImpl) // konkrete Klasse als UserDetailsService
 				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
 		return http.build();
@@ -58,14 +52,14 @@ public class SecurityConfig {
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(List.of(
-				"http://localhost:5173",  // Vite Dev
-				"http://localhost:3000",  // CRA / Dev-Port
-				"http://localhost",       // Prod via Port 80
-				"http://frontend:80"      // Docker-Network
+				"http://localhost:5173",
+				"http://localhost:3000",
+				"http://localhost",
+				"http://frontend:80"
 		));
 		configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
-		configuration.setAllowCredentials(true); // Cookies
+		configuration.setAllowCredentials(true);
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
