@@ -1,4 +1,4 @@
-package org.cyntho.asgard.config; // Package ggf. anpassen
+package org.cyntho.asgard.config;
 
 import lombok.RequiredArgsConstructor;
 import org.cyntho.asgard.service.impl.UserServiceImpl;
@@ -28,10 +28,11 @@ import java.util.List;
 public class SecurityConfig {
 
 	private final JwtAuthenticationFilter jwtAuthFilter;
-	private final UserServiceImpl userServiceImpl;
+	private final UserServiceImpl userServiceImpl; // konkrete Klasse
 
 	@Bean
 	public UserDetailsService userDetailsService() {
+		// Diese Bean ist die zentrale UserDetailsService-Instanz
 		return userServiceImpl;
 	}
 
@@ -53,14 +54,15 @@ public class SecurityConfig {
 		return http.build();
 	}
 
+	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
 		configuration.setAllowedOrigins(List.of(
-						"http://localhost:5173",  // Vite Dev
-						"http://localhost:3000",  // CRA / Dev-Port (optional) / Frontend
-						"http://localhost",       // Prod via Port 80
-						"http://frontend:80"     // when running in Docker-Network
-				));
+				"http://localhost:5173",  // Vite Dev
+				"http://localhost:3000",  // CRA / Dev-Port
+				"http://localhost",       // Prod via Port 80
+				"http://frontend:80"      // Docker-Network
+		));
 		configuration.setAllowedMethods(List.of("GET","POST","PUT","DELETE","OPTIONS"));
 		configuration.setAllowedHeaders(List.of("Authorization","Content-Type"));
 		configuration.setAllowCredentials(true); // Cookies
@@ -79,5 +81,4 @@ public class SecurityConfig {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-
 }
