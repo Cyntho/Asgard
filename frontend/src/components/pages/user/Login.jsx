@@ -1,10 +1,52 @@
-import React from "react";
-import PageTitle from "../layout/PageTitle";
-import { Link, Form } from "react-router-dom";
-import apiClient from "../../api/apiClient";
+import React, { useState } from "react";
+import { Navigate, Link } from 'react-router-dom';
+import { Loader2, AlertCircle } from 'lucide-react';
+import { toast } from 'react-toastify';
+
+import PageTitle from "../../layout/PageTitle";
+import { useLogin } from "@/hooks/useAuth.jsx";
+import { useAuthStore } from "@stores/auth.store.jsx";
+
+
+
+/*
+[
+{
+id: 1,
+displayName: "My Teamspeak test server",
+host: "localhost",
+webQueryPort: 10080,
+sshPort: 10022,
+rawPort: 10011,
+useHttps: true,
+enabled: true,
+queryUsername: "serveradmin",
+queryPassword: "Kee2gSYo",
+apiKey: "BADosgBU_JU5SmNKG6uV9HzzBW6ETHVJo6U_sx8",
+createdByUsername: "Admin",
+updatedByUsername: "Admin"
+}
+]
+
+ */
+
+
 
 export default function Login() {
 
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const loginHook = useLogin();
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated());
+
+  if (isAuthenticated) {
+    return <Navigate to="/" replace />
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    loginHook.mutate({ username, password });
+  };
 
   const labelStyle =
     "block text-lg font-semibold text-primary dark:text-light mb-2";
@@ -16,7 +58,7 @@ export default function Login() {
         {/* Title */}
         <PageTitle title="Login" />
         {/* Form */}
-        <Form method="POST" className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Email Field */}
           <div>
             <label htmlFor="username" className={labelStyle}>
@@ -27,6 +69,7 @@ export default function Login() {
               type="text"
               name="username"
               placeholder="Your Username"
+              onChange={(e) => setUsername(e.target.value)}
               required
               className={textFieldStyle}
             />
@@ -42,6 +85,7 @@ export default function Login() {
               type="password"
               name="password"
               placeholder="Your Password"
+              onChange={(e) => setPassword(e.target.value)}
               required
               minLength={8}
               maxLength={20}
@@ -54,18 +98,33 @@ export default function Login() {
             <button
               type="submit"
               className="w-full px-6 py-2 text-white dark:text-black text-xl rounded-md transition duration-200 bg-primary dark:bg-light hover:bg-dark dark:hover:bg-lighter"
+              disabled={loginHook.isPending || !username || !password}
             >
-              Login
+              {loginHook.isPending ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : (
+                  'Sign In'
+                )}
             </button>
           </div>
-        </Form>
+
+          {loginHook.isError && (
+            <div className="flex items-center gap-2 text-destructive text-xs bg-destructive/10 rounded-md px-3 py-2">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0 text-red-500" />
+              <span className="flex items-center text-red-500 font-semibold">Invalid credentials. Please try again.</span>
+            </div>
+          )}
+        </form>
 
         {/* Register Link */}
         <p className="text-center text-gray-600 dark:text-gray-400 mt-4">
           Don't have an account?{" "}
           <Link
             to="/register"
-            className="text-primary dark:text-light hover:text-dark dark:hover:text-primary transition duration-200"
+            className="text-primary dark:text-light hover:text-dark dark:hover:text-lighter transition duration-200"
           >
             Register Here
           </Link>
@@ -73,23 +132,4 @@ export default function Login() {
       </div>
     </div>
   );
-}
-
-export async function loginAction({request, params}){
-    try {
-        const data = await request.formData();
-
-        const contactData = {
-            username: data.get("username"),
-            password: data.get("password"),
-        }
-
-        const response = await apiClient.post("/auth/login", contactData);
-        return {success: "true"}
-    } catch (error) {
-        throw new Response(
-            error.message || "Failed to login. Please try again later",
-            { status: error.status || 500}
-        )
-    }
 }

@@ -35,7 +35,7 @@ public class AuthServiceImpl implements IAuthService {
 			String refreshToken = jwtService.generateRefreshToken(user);
 			addRefreshTokenCookie(httpResponse, refreshToken);
 
-			return new AuthDto.AuthResponse(accessToken);
+			return new AuthDto.AuthResponse(accessToken, user);
 		} catch (IllegalArgumentException e) {
 			throw new ResponseStatusException(HttpStatus.CONFLICT, e.getMessage());
 		}
@@ -63,7 +63,7 @@ public class AuthServiceImpl implements IAuthService {
 		addRefreshTokenCookie(httpResponse, refreshToken);
 
 		log.info("AuthServiceImpl.login: Generated token {}", accessToken);
-		return new AuthDto.AuthResponse(accessToken);
+		return new AuthDto.AuthResponse(accessToken, user);
 	}
 
 	@Override
@@ -92,7 +92,7 @@ public class AuthServiceImpl implements IAuthService {
 			String newRefreshToken = jwtService.generateRefreshToken(user);
 			addRefreshTokenCookie(httpResponse, newRefreshToken);
 
-			return new AuthDto.AuthResponse(newAccessToken);
+			return new AuthDto.AuthResponse(newAccessToken, user);
 		} catch (ResponseStatusException e) {
 			throw e;
 		} catch (Exception e) {

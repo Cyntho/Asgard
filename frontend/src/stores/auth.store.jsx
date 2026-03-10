@@ -21,8 +21,10 @@ export const useAuthStore = create(
 
       isAdmin: () => get().user?.role === 'admin',
 
+      getUsername: () => get().user?.username ?? "unknown user",
+
       canWrite: () => get().user?.role === 'admin',
     }),
-    { name: 'ts6-auth' },
+    { name: 'my-auth' },
   ),
 );

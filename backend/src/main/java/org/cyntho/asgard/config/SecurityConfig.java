@@ -25,23 +25,22 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@RequiredArgsConstructor
 @EnableMethodSecurity
 public class SecurityConfig {
-
-	private final UserServiceImpl userService;
 
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http,
 	                                               JwtAuthenticationFilter jwtAuthenticationFilter,
-	                                               AuthenticationProvider authenticationProvider) throws Exception {
+	                                               AuthenticationProvider authenticationProvider,
+	                                               UserServiceImpl userService) throws Exception {
 		http
 				.csrf(AbstractHttpConfigurer::disable)
 				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/auth/**").permitAll()
-						.requestMatchers("/api/v1/**").permitAll()
+						.requestMatchers("/api/v1/auth/**").permitAll()
+						.requestMatchers("/api/v1/news/**").permitAll()
+						.requestMatchers("/api/v1/ts/**").permitAll()
 						.requestMatchers(HttpMethod.GET, "/api/public/**").permitAll()
 						.anyRequest().authenticated()
 				)
@@ -67,11 +66,6 @@ public class SecurityConfig {
 		UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 		source.registerCorsConfiguration("/**", configuration);
 		return source;
-	}
-
-	@Bean
-	public UserDetailsService userDetailsService() {
-		return userService;
 	}
 
 	@Bean

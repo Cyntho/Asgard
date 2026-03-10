@@ -1,6 +1,6 @@
 import React from "react";
-import errorImage from "../../assets/error.png"
-import NotFound from "../../assets/404.jpg"
+import errorImage from "@assets/error.png"
+import NotFound from "@assets/404.jpg"
 import { NavLink } from "react-router-dom";
 
 export default function NewsCardShort({news}) {

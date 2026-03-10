@@ -21,7 +21,6 @@ public class UserServiceImpl implements IUserService, UserDetailsService {
 	private final UserRepository userRepository;
 	private final PasswordEncoder passwordEncoder;
 
-
 	@Override
 	public UserEntity registerUser(AuthDto.RegisterRequest request) {
 		userRepository.findByUsername(request.username()).ifPresent(u -> {

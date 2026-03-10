@@ -1,5 +1,6 @@
 package org.cyntho.asgard.bot;
 
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.cyntho.asgard.bot.dto.BotCommand;
 import org.cyntho.asgard.bot.dto.BotStatus;
@@ -11,6 +12,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Getter
 @Service
 @RequiredArgsConstructor
 public class BotClient {

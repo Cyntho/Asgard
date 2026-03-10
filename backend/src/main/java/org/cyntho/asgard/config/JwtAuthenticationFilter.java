@@ -3,6 +3,7 @@ package org.cyntho.asgard.config;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.cyntho.asgard.service.JwtService;
 import org.cyntho.asgard.service.impl.UserServiceImpl;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -15,16 +16,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Component
+@RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
 	private final JwtService jwtService;
 	private final UserServiceImpl userService;   // <--- konkrete Klasse
-
-	public JwtAuthenticationFilter(JwtService jwtService,
-	                               UserServiceImpl userService) {
-		this.jwtService = jwtService;
-		this.userService = userService;
-	}
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request,

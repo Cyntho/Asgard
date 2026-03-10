@@ -1,0 +1,22 @@
+model TsServerConfig {
+  id           Int      @id @default(autoincrement())
+  name         String
+  host         String
+  webqueryPort Int      @default(10080)
+  apiKey       String
+  useHttps     Boolean  @default(false)
+  sshPort      Int      @default(10022)
+  sshUsername  String?
+  sshPassword  String?
+  enabled      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  userAccess    UserServerAccess[]
+  botFlows      BotFlow[]
+  botLogs       BotExecutionLog[]
+  musicBots     MusicBot[]
+  songs         Song[]
+  radioStations RadioStation[]
+  widgets       Widget[]
+}

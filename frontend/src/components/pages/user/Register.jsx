@@ -1,6 +1,6 @@
-import PageTitle from "../layout/PageTitle";
+import PageTitle from "@layout/PageTitle";
 import { Form } from "react-router-dom";
-import apiClient from "../../api/apiClient";
+import apiClient from "@api/apiClient";
 
 export default function Register() {
 
@@ -83,7 +83,7 @@ export default function Register() {
                             type="submit"
                             className="w-full px-6 py-2 text-white dark:text-black text-xl rounded-md transition duration-200 bg-primary dark:bg-light hover:bg-dark dark:hover:bg-lighter"
                         >
-                            Login
+                            Register
                         </button>
                     </div>
                 </Form>

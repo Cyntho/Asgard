@@ -1,18 +1,21 @@
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faHeadset, faMoon, faSun } from "@fortawesome/free-solid-svg-icons";
-import { Link, NavLink } from "react-router-dom";
+import { Link, Navigate, NavLink } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { useUiStore } from "@/stores/ui.store.jsx"
+import { useAuthStore } from "../../stores/auth.store";
 
 
-export default function Header() {
+export function Header() {
+  const user = useAuthStore();
+
 	const { theme, toggleTheme } = useUiStore();
 
   const navLinkClass =
     "text-center text-lg font-primary font-semibold text-primary py-2 dark:text-light hover:text-dark dark:hover:text-lighter";
   return (
-    <header className="border-b border-gray-300 sticky top-0 z-20 bg-gray-100 bg-normalbg dark:bg-darkbg">
-      <div className="flex items-center justify-between mx-auto max-w-[1152px] px-6 py-4">
+    <header className="border-b border-gray-300 sticky top-0 z-20 bg-normalbg dark:bg-darkbg">
+      <div className="flex items-center justify-between mx-auto max-w-6xl px-6 py-4">
         <Link to="/" className={navLinkClass}>
           <FontAwesomeIcon icon={faHeadset} className="h-8 w-8"  />
           <span className="font-bold">Asgard</span>
@@ -30,10 +33,10 @@ export default function Header() {
           </button>
           <ul className="flex space-x-6">
             <li>
-              <NavLink to="/home" className={({ isActive }) => {
+              <NavLink to="/news" className={({ isActive }) => {
                 return isActive ? `underline ${navLinkClass}` : `${navLinkClass}`
               }}>
-                Home
+                News
               </NavLink>
             </li>
             <li>
@@ -42,14 +45,34 @@ export default function Header() {
               }}>
                 About
               </NavLink>
-            </li>            
-            <li>
-              <NavLink to="/login" className={({ isActive }) => {
-                return isActive ? `underline ${navLinkClass}` : `${navLinkClass}`
-              }}>
-                Login
-              </NavLink>
-            </li>            
+            </li>
+            { user !== null && user.isAuthenticated() ? (
+              <li>
+                <NavLink to="/dashboard" className={({ isActive }) => {
+                  return isActive ? `underline ${navLinkClass}` : `${navLinkClass}`
+                }}>
+                  Dashboard
+                </NavLink>
+              </li>
+            ) : "" }
+            { user === null || !user.isAuthenticated()? (
+              <li>
+                <NavLink to="/login" className={({ isActive }) => {
+                  return isActive ? `underline ${navLinkClass}` : `${navLinkClass}`
+                }}>
+                  Login
+                </NavLink>
+              </li>  
+            ) : (
+              <li>
+                <button 
+                  className={navLinkClass}
+                  onClick={() => user.logout()}                
+                >
+                  Profile: {user.getUsername()}
+                </button>
+              </li>
+            ) }       
           </ul>
         </nav>
       </div>
